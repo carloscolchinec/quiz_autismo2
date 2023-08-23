@@ -16,6 +16,11 @@ export default {
         this.$router.push('/select');
       }
     },
+
+    infoQuiz() {
+
+        this.$router.push('/info');
+    },
   },
 };
 </script>
@@ -46,8 +51,13 @@ export default {
             >términos y condiciones</a
           >
         </label>
-      </div>
+
+        <br>
+        <br>
+        
     </div>
+    <button class="btn btn-warning" @click="infoQuiz">Estadisticas de la encuestas</button>
+</div>
 
     <div
     class="modal fade"

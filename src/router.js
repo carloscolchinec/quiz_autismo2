@@ -6,6 +6,7 @@ import Home from './components/Home.vue';
 import Select from './components/Select.vue';
 import Questons from './components/Questions.vue';
 import QDoctors from './components/QuestionsDoctor.vue';
+import Info from './components/Info.vue';
 
 // Instala el enrutador en Vue
 Vue.use(VueRouter);
@@ -16,7 +17,7 @@ const routes = [
   { path: '/select', component: Select },
   { path: '/questions/:groupId', component: Questons },
   { path: '/qdoctor/', component: QDoctors },
-
+  { path: '/info', component: Info },
 ];
 
 // Crea una instancia de VueRouter

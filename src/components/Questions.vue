@@ -1,4 +1,6 @@
 <script>
+import jsPDF from "jspdf";
+
 export default {
   name: "QuestionnaireComponent",
   data() {
@@ -120,13 +122,50 @@ export default {
 
       const dataToSave = {
         socioeconomic: this.socioeconomic,
-        sector: this.sector,  
+        sector: this.sector,
         result: this.result,
       };
       const savedData = JSON.parse(localStorage.getItem("savedData")) || [];
       savedData.push(dataToSave);
       localStorage.setItem("savedData", JSON.stringify(savedData));
     },
+    downloadPDF() {
+  const pdf = new jsPDF();
+  const currentDate = new Date().toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Encabezado con la fecha actual
+  pdf.setFontSize(16);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text("Resultado del Cuestionario", pdf.internal.pageSize.width / 2, 20, { align: "center" });
+  pdf.setFontSize(12);
+  pdf.setTextColor(80, 80, 80);
+  pdf.text(`Fecha: ${currentDate}`, pdf.internal.pageSize.width / 2, 30, { align: "center" });
+
+  // Resultado del cuestionario
+  pdf.setFontSize(13);
+  pdf.setTextColor(40, 40, 40);
+  pdf.text(`Resultado: ${this.result}`, pdf.internal.pageSize.width / 2, 50, { align: "center" });
+
+  // Respuestas seleccionadas
+  pdf.setFontSize(10);
+  pdf.setTextColor(40, 40, 40);
+  let yOffset = 60;
+  for (let i = 0; i < this.questions.length; i++) {
+    yOffset += 10;
+    pdf.text(`${i + 1}. ${this.questions[i]}`, 20, yOffset);
+    yOffset += 10;
+    pdf.text(`Respuesta: ${this.answers[i] ? this.answers[i] : 'NO SELECCIONADA'}`, 20, yOffset);
+  }
+
+  // Guardar el PDF
+  pdf.save("resultado_cuestionario.pdf");
+},
+
+
   },
 };
 </script>
@@ -247,7 +286,7 @@ export default {
         <button @click="currentQuestionIndex++">Continuar</button>
       </div>
 
-      <div class="card" v-else>
+      <div class="card m-3" v-else>
         <h2 class="questionnaire-title">Cuestionario</h2>
         <div v-if="!showResult">
           <transition name="fade" mode="out-in">
@@ -291,6 +330,21 @@ export default {
           <p class="result-text">{{ result }}</p>
 
           <br />
+          <h3 class="selected-questions-title">Respuestas Seleccionadas:</h3>
+          <div class="selected-questions-list">
+            <div
+              v-for="(question, index) in questions"
+              :key="index"
+              class="question-answer"
+            >
+              <div class="question-text_result">{{ question }}</div>
+              <div class="answer-text">
+                <strong>Respuesta:</strong>
+                {{ answers[index] ? answers[index] : "NO SELECCIONADA" }}
+              </div>
+            </div>
+          </div>
+          <br />
           <br />
 
           <div
@@ -308,9 +362,20 @@ export default {
             </div>
           </div>
 
+          <br />
+          <button @click="downloadPDF">Descargar Resultados en PDF</button>
+
+          <br />
+
           <!-- Mostrar información adicional si hay más de 4 respuestas "SI" -->
           <div v-if="resultPercentage > 4">
-            <h4>Información Adicional:</h4>
+            <h5 class="text-left">
+              <strong
+                >Se recomienda visitar esos centros medicos para mas
+                información:</strong
+              >
+            </h5>
+            <br />
             <div class="additional-info-table">
               <div class="additional-info-row">
                 <div class="additional-info-column">
@@ -344,6 +409,27 @@ export default {
 </template>
 
 <style scoped>
+.selected-questions-list {
+  display: flex;
+  flex-direction: column;
+}
+.question-answer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+.question-text_result {
+  flex: 1;
+  font-size: 14px;
+}
+.answer-text {
+  flex: 2;
+  text-align: right;
+}
+
 .back-button {
   position: absolute;
   top: 90px;
@@ -415,7 +501,6 @@ export default {
   padding: 20px;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 600px;
   position: relative;
   z-index: 1;
 }
@@ -423,7 +508,6 @@ export default {
   font-size: 2rem;
   color: #333;
 }
-
 
 .question-text {
   font-size: 1.5rem;
